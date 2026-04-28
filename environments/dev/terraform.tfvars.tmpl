@@ -1,0 +1,38 @@
+# Identificacao
+# TODO_MANUAL: preencher por ticket
+dev_name  = "joao"
+app_name  = "portal"
+app_stack = "dotnet"
+
+# Repositorio
+ado_org     = "minha-org"
+ado_project = "Portal"
+ado_repo    = "portal-api"
+branch      = "develop"
+
+# Banco
+db_server_internal = "db-interno.dominio.local"
+db_source          = "portal_homolog"
+db_name_dev        = "dev_joao_portal"
+
+# VM
+hyperv_host     = "hyperv01.dominio.local"
+vm_template_vhd = "C:\\Templates\\template-dotnet.vhdx"
+vm_cpu          = 2
+vm_memory_mb    = 4096
+dev_vswitch     = "vSwitch-Dev"
+
+# Acesso externo (opcional)
+external_access      = true
+app_internal_port    = "443"
+fortinet_external_ip = "200.0.0.10"
+assigned_port        = 8443
+hosted_zone_id       = "Z0XXXXXXXXX"
+
+# Provedores
+aws_region        = "us-east-1"
+fortinet_hostname = "fw01.dominio.com.br"
+
+# Lifecycle
+shutdown_date = "2026-05-10"
+destroy_date  = "2026-05-17"

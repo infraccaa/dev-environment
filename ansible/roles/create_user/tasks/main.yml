@@ -1,0 +1,7 @@
+---
+# TODO_MANUAL: ajustar para Linux/Windows conforme app_stack
+- name: Ensure dev user exists
+  ansible.builtin.user:
+    name: "{{ dev_user }}"
+    shell: /bin/bash
+    state: present

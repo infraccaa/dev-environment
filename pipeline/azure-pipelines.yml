@@ -1,0 +1,75 @@
+trigger: none
+pr: none
+
+variables:
+- group: iac-dev-shared
+
+parameters:
+- name: tfvarsFile
+  type: string
+  default: environments/dev/terraform.tfvars
+
+stages:
+- stage: Validate
+  jobs:
+  - job: TerraformValidate
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - checkout: self
+    - script: |
+        sudo apt-get update
+        sudo apt-get install -y ansible
+      displayName: Install dependencies
+    - script: |
+        cd environments/dev
+        terraform init -backend=false
+        terraform fmt -check
+        terraform validate
+        terraform plan -var-file="$(Build.SourcesDirectory)/${{ parameters.tfvarsFile }}"
+      displayName: Terraform validate
+
+- stage: PlanApply
+  dependsOn: Validate
+  jobs:
+  - job: TerraformPlanApply
+    name: TerraformApply
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - checkout: self
+    - script: |
+        cd environments/dev
+        terraform init
+        terraform apply -auto-approve -var-file="$(Build.SourcesDirectory)/${{ parameters.tfvarsFile }}"
+        VM_IP=$(terraform output -raw vm_ip)
+        echo "##vso[task.setvariable variable=DEV_VM_IP;isOutput=true]$VM_IP"
+      displayName: Terraform apply
+      name: setVmIp
+      env:
+        TF_VAR_hyperv_username: $(HYPERV_USERNAME)
+        TF_VAR_hyperv_password: $(HYPERV_PASSWORD)
+        TF_VAR_fortinet_api_token: $(FORTINET_API_TOKEN)
+        TF_VAR_fortinet_hostname: $(FORTINET_HOSTNAME)
+        AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+        AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+
+- stage: ConfigureVM
+  dependsOn: PlanApply
+  variables:
+    DEV_VM_IP: $[ stageDependencies.PlanApply.TerraformPlanApply.outputs['setVmIp.DEV_VM_IP'] ]
+  jobs:
+  - job: AnsibleRun
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - checkout: self
+    - script: |
+        sudo apt-get update
+        sudo apt-get install -y ansible
+      displayName: Install Ansible
+    - script: |
+        ansible-playbook ansible/playbook-dev-setup.yml -i "$(DEV_VM_IP),"
+      displayName: Run ansible
+      env:
+        ADO_PAT: $(ADO_PAT)

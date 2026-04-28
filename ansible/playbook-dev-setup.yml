@@ -1,0 +1,13 @@
+- name: Configurar ambiente de desenvolvimento
+  hosts: all
+  become: true
+  vars:
+    dev_user: "{{ dev_name }}"
+    app_type: "{{ app_stack }}"
+    db_conn: "{{ db_server_internal }}"
+    db_name: "{{ db_name_dev }}"
+
+  roles:
+    - role: create_user
+    - role: deploy_app
+    - role: configure_env

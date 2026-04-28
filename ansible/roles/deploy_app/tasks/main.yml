@@ -1,0 +1,7 @@
+---
+# TODO_MANUAL: definir estrategia de clone (PAT via Key Vault/Vault)
+- name: Clone app repository
+  ansible.builtin.git:
+    repo: "https://dev.azure.com/{{ ado_org }}/{{ ado_project }}/_git/{{ ado_repo }}"
+    dest: "/opt/{{ app_name }}"
+    version: "{{ branch }}"
